@@ -4,9 +4,15 @@
   become: true
 
   tasks:
-  - name: Install the PostgreSQL 15 repo RPM
+
+  - name: Download PostgreSQL 15 repo RPM for current Fedora version
+    ansible.builtin.shell: |
+      rpm -E %fedora
+    register: fedora_version
+
+  - name: Install PostgreSQL 15 repo RPM
     ansible.builtin.yum:
-      name: https://download.postgresql.org/pub/repos/yum/15/fedora/fedora-$(rpm -E %fedora)-x86_64/pgdg-fedora-repo-latest.noarch.rpm
+      name: "https://download.postgresql.org/pub/repos/yum/15/fedora/fedora-{{ fedora_version.stdout }}-x86_64/pgdg-fedora-repo-latest.noarch.rpm"
       state: present
 
   - name: Disable built-in PostgreSQL module (just in case)
