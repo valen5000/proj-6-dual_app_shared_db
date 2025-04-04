@@ -4,14 +4,16 @@
   become: true
   tasks:
 
-    - name: Enable PostgreSQL module
-      ansible.builtin.command: dnf module enable postgresql:15 -y
+    - name: Update package metadata
+      ansible.builtin.yum:
+        name: "*"
+        state: latest
 
-    - name: Install PostgreSQL packages
+    - name: Install PostgreSQL packages (from Fedora repos)
       ansible.builtin.yum:
         name:
           - postgresql-server
-          - postgresql-contrib
+          - postgresql
         state: present
 
     - name: Initialize PostgreSQL DB
