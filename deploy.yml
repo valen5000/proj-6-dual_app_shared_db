@@ -4,8 +4,25 @@
   become: yes
 
   tasks:
-    - name: Install dependencies
+    - name: Gather facts
+      ansible.builtin.setup:
+
+    - name: Install dependencies on Debian-based systems (Ubuntu)
       apt:
+        name:
+          - git
+          - python3
+          - python3-pip
+          - nodejs
+          - npm
+          - postgresql
+          - postgresql-contrib
+        state: present
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+
+    - name: Install dependencies on RedHat-based systems (CentOS/Fedora)
+      dnf:
         name:
           - git
           - python3
@@ -15,7 +32,8 @@
           - postgresql-server
           - postgresql-contrib
         state: present
-        when: ansible_distribution=="fedora"
+        update_cache: yes
+      when: ansible_os_family == "RedHat"
 
     - name: Initialize PostgreSQL
       command: postgresql-setup initdb
