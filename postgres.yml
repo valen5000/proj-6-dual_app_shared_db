@@ -1,24 +1,25 @@
 ---
-- name: Enable PostgreSQL module
-  ansible.builtin.command: dnf module enable postgresql:15 -y
+- name: Setup PostgreSQL on Fedora
+  hosts: web3
   become: true
+  tasks:
 
-- name: Install PostgreSQL packages
-  ansible.builtin.yum:
-    name:
-      - postgresql-server
-      - postgresql-contrib
-    state: present
-  become: true
+    - name: Enable PostgreSQL module
+      ansible.builtin.command: dnf module enable postgresql:15 -y
+
+    - name: Install PostgreSQL packages
+      ansible.builtin.yum:
+        name:
+          - postgresql-server
+          - postgresql-contrib
+        state: present
 
     - name: Initialize PostgreSQL DB
-  ansible.builtin.command: postgresql-setup --initdb
-  become: true
+      ansible.builtin.command: postgresql-setup --initdb
 
-- name: Enable and start PostgreSQL service
-  ansible.builtin.systemd:
-    name: postgresql
-    enabled: true
-    state: started
-  become: true
+    - name: Enable and start PostgreSQL service
+      ansible.builtin.systemd:
+        name: postgresql
+        enabled: true
+        state: started
 ...
