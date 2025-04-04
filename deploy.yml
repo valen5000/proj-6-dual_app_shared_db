@@ -5,7 +5,7 @@
   tasks:
 
     - name: Install dependencies
-      yum:
+      apt:
         name:
           - git
           - python3
