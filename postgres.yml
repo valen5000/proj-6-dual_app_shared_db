@@ -1,27 +1,32 @@
 ---
-- name: Setup PostgreSQL on Fedora
+- name: Install PostgreSQL 15 from official repo on Fedora
   hosts: web3
   become: true
   tasks:
 
-    - name: Update package metadata
+    - name: Install the PostgreSQL 15 repo RPM
       ansible.builtin.yum:
-        name: "*"
-        state: latest
-
-    - name: Install PostgreSQL packages (from Fedora repos)
-      ansible.builtin.yum:
-        name:
-          - postgresql-server
-          - postgresql
+        name: https://download.postgresql.org/pub/repos/yum/15/fedora/fedora-$(rpm -E %fedora)-x86_64/pgdg-fedora-repo-latest.noarch.rpm
         state: present
 
-    - name: Initialize PostgreSQL DB
-      ansible.builtin.command: postgresql-setup --initdb
+    - name: Disable built-in PostgreSQL module (just in case)
+      ansible.builtin.command: dnf -qy module disable postgresql
 
-    - name: Enable and start PostgreSQL service
+    - name: Install PostgreSQL 15 server and contrib
+      ansible.builtin.yum:
+        name:
+          - postgresql15-server
+          - postgresql15-contrib
+        state: present
+
+    - name: Initialize PostgreSQL 15 database
+      ansible.builtin.command: /usr/pgsql-15/bin/postgresql-15-setup initdb
+      args:
+        creates: /var/lib/pgsql/15/data/PG_VERSION
+
+    - name: Enable and start PostgreSQL 15 service
       ansible.builtin.systemd:
-        name: postgresql
+        name: postgresql-15
         enabled: true
         state: started
 ...
