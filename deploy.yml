@@ -1,0 +1,49 @@
+          - postgresql-server
+          - postgresql-contrib
+        state: present
+
+    # 2️⃣ Initialize and Start PostgreSQL
+    - name: Initialize PostgreSQL
+      command: postgresql-setup initdb
+      args:
+        creates: /var/lib/pgsql/data/pg_hba.conf
+
+    - name: Start and Enable PostgreSQL
+      service:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    # 3️⃣ Clone the GitHub Repository
+    - name: Clone Flask and Node.js application repository
+      git:
+        repo: "https://github.com/valen5000/proj-6-dual_app_shared_db.git"
+        dest: /home/fedora/proj-6-dual_app_shared_db
+        version: main
+
+    # 4️⃣ Install Python Dependencies for Flask
+    - name: Install Flask dependencies
+      pip:
+        requirements: /home/fedora/proj-6-dual_app_shared_db/flask-app/requirements.txt
+        executable: pip3
+
+    # 5️⃣ Install Node.js Dependencies
+    - name: Install Node.js dependencies
+      npm:
+        path: /home/fedora/proj-6-dual_app_shared_db/node-app
+        state: present
+
+    # 6️⃣ Start Flask App (Background Mode)
+    - name: Start Flask Application
+      shell: "cd /home/fedora/proj-6-dual_app_shared_db/flask-app && nohup python3 app.py > flask.log 2>&1 &"
+      async: 60
+      poll: 0
+
+    # 7️⃣ Start Node.js App (Background Mode)
+    - name: Start Node.js Application
+      shell: "cd /home/fedora/proj-6-dual_app_shared_db/node-app && nohup node app.js > node.log 2>&1 &"
+      async: 60
+      poll: 0
+...
+                                                                                                                                                          62,1          Bot
+
