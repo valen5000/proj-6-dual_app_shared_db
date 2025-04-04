@@ -1,0 +1,24 @@
+---
+- name: Enable PostgreSQL module
+  ansible.builtin.command: dnf module enable postgresql:15 -y
+  become: true
+
+- name: Install PostgreSQL packages
+  ansible.builtin.yum:
+    name:
+      - postgresql-server
+      - postgresql-contrib
+    state: present
+  become: true
+
+    - name: Initialize PostgreSQL DB
+  ansible.builtin.command: postgresql-setup --initdb
+  become: true
+
+- name: Enable and start PostgreSQL service
+  ansible.builtin.systemd:
+    name: postgresql
+    enabled: true
+    state: started
+  become: true
+...
