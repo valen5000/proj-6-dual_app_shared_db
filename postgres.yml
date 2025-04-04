@@ -1,10 +1,12 @@
 ---
-- name: Configure PostgreSQL for Application
+- name: Ensure Docker is running
   hosts: web3
   become: true
+  vars:
+    docker_host: "unix:///var/run/docker.sock"  
   tasks:
-    - name: Ensure Docker is running
-      ansible.builtin.docker_container:
+    - name: Ensure Docker service is running
+      community.docker.docker_container:
         name: postgres15
         image: postgres:15
         state: started
@@ -12,11 +14,5 @@
           - "5432:5432"
         env:
           POSTGRES_PASSWORD: mysecretpassword
-
-    - name: Set up environment variables for PostgreSQL connection
-      ansible.builtin.set_fact:
-        postgres_connection: "postgres://postgres:mysecretpassword@127.0.0.1:5432/mydatabase"
-
-    - name: Test PostgreSQL connection (Optional)
-      ansible.builtin.command: "psql {{ postgres_connection }}"
+        docker_host: "{{ docker_host }}"
 ...
