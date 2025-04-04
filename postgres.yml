@@ -2,8 +2,8 @@
 - name: Install PostgreSQL 15 from official repo on Fedora
   hosts: web3
   become: true
-  tasks:
 
+  tasks:
   - name: Install the PostgreSQL 15 repo RPM
     ansible.builtin.yum:
       name: https://download.postgresql.org/pub/repos/yum/15/fedora/fedora-$(rpm -E %fedora)-x86_64/pgdg-fedora-repo-latest.noarch.rpm
