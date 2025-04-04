@@ -5,7 +5,7 @@
   tasks:
 
     - name: Install dependencies
-      apt:
+      yum:
         name:
           - git
           - python3
@@ -15,6 +15,7 @@
           - postgresql-server
           - postgresql-contrib
         state: present
+        when: ansible_distribution=="fedora"
 
     - name: Initialize PostgreSQL
       command: postgresql-setup initdb
