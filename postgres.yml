@@ -4,29 +4,29 @@
   become: true
   tasks:
 
-    - name: Install the PostgreSQL 15 repo RPM
-      ansible.builtin.yum:
-        name: https://download.postgresql.org/pub/repos/yum/15/fedora/fedora-$(rpm -E %fedora)-x86_64/pgdg-fedora-repo-latest.noarch.rpm
-        state: present
+  - name: Install the PostgreSQL 15 repo RPM
+    ansible.builtin.yum:
+      name: https://download.postgresql.org/pub/repos/yum/15/fedora/fedora-$(rpm -E %fedora)-x86_64/pgdg-fedora-repo-latest.noarch.rpm
+      state: present
 
-    - name: Disable built-in PostgreSQL module (just in case)
-      ansible.builtin.command: dnf -qy module disable postgresql
+  - name: Disable built-in PostgreSQL module (just in case)
+    ansible.builtin.command: dnf -qy module disable postgresql
 
-    - name: Install PostgreSQL 15 server and contrib
-      ansible.builtin.yum:
-        name:
-          - postgresql15-server
-          - postgresql15-contrib
-        state: present
+  - name: Install PostgreSQL 15 server and contrib
+    ansible.builtin.yum:
+      name:
+        - postgresql15-server
+        - postgresql15-contrib
+      state: present
 
-    - name: Initialize PostgreSQL 15 database
-      ansible.builtin.command: /usr/pgsql-15/bin/postgresql-15-setup initdb
-      args:
-        creates: /var/lib/pgsql/15/data/PG_VERSION
+  - name: Initialize PostgreSQL 15 database
+    ansible.builtin.command: /usr/pgsql-15/bin/postgresql-15-setup initdb
+    args:
+      creates: /var/lib/pgsql/15/data/PG_VERSION
 
-    - name: Enable and start PostgreSQL 15 service
-      ansible.builtin.systemd:
-        name: postgresql-15
-        enabled: true
-        state: started
+  - name: Enable and start PostgreSQL 15 service
+    ansible.builtin.systemd:
+      name: postgresql-15
+      enabled: true
+      state: started
 ...
