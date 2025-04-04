@@ -2,8 +2,8 @@
 - name: Deploy Flask and Node.js Applications
   hosts: g1
   become: yes
-  tasks:
 
+  tasks:
     - name: Install dependencies
       yum:
         name:
