@@ -9,11 +9,16 @@
     db_name: "shared_db"
 
   tasks:
+    # Debug OS information
+    - name: Show distribution info
+      debug:
+        msg: "{{ ansible_distribution }} {{ ansible_distribution_version }}"
+
     # Install PostgreSQL
     - name: Install PostgreSQL (Ubuntu)
       apt:
         name: 
-          - "postgresql"
+          - "postgresql-{{ postgres_version }}"
           - "postgresql-contrib"
           - "libpq-dev"
           - "python3-psycopg2"
@@ -21,20 +26,20 @@
         update_cache: yes
       when: ansible_distribution == 'Ubuntu'
 
-    - name: Install PostgreSQL (CentOS 9)
+    - name: Install PostgreSQL (CentOS/RHEL)
       dnf:
         name:
           - "postgresql-server"
           - "postgresql-contrib"
           - "python3-psycopg2"
         state: present
-      when: ansible_distribution == 'CentOS'
+      when: ansible_distribution in ['CentOS', 'RedHat']
 
     - name: Install PostgreSQL (Amazon Linux)
       yum:
         name:
-          - "postgresql12-server"  # For Amazon Linux 2
-          - "postgresql12-contrib"
+          - "postgresql-server"  # Changed from postgresql12-server
+          - "postgresql-contrib"
           - "python3-psycopg2"
         state: present
       when: ansible_distribution == 'Amazon'
@@ -42,7 +47,7 @@
     # Initialize DB for CentOS/Amazon
     - name: Initialize PostgreSQL DB (CentOS/Amazon)
       command: "/usr/bin/postgresql-setup --initdb"
-      when: ansible_distribution in ['CentOS', 'Amazon']
+      when: ansible_distribution in ['CentOS', 'Amazon', 'RedHat']
       notify: restart postgresql
 
     # Configure service
@@ -52,10 +57,19 @@
         state: started
         enabled: yes
 
+    # Find actual PostgreSQL config path for Ubuntu
+    - name: Find PostgreSQL config directory (Ubuntu)
+      find:
+        paths: /etc/postgresql
+        patterns: "main"
+        file_type: directory
+      register: pg_config_dir
+      when: ansible_distribution == 'Ubuntu'
+
     # Configure pg_hba.conf for password authentication
     - name: Configure password authentication (Ubuntu)
       lineinfile:
-        path: "/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf"
+        path: "{{ pg_config_dir.files[0].path if pg_config_dir.files else '/etc/postgresql/' + postgres_version + '/main/pg_hba.conf' }}/pg_hba.conf"
         regexp: "^host\\s+all\\s+all\\s+127.0.0.1/32\\s+"
         line: "host    all             all             127.0.0.1/32            md5"
       when: ansible_distribution == 'Ubuntu'
@@ -66,7 +80,7 @@
         path: "/var/lib/pgsql/data/pg_hba.conf"
         regexp: "^host\\s+all\\s+all\\s+127.0.0.1/32\\s+"
         line: "host    all             all             127.0.0.1/32            md5"
-      when: ansible_distribution in ['CentOS', 'Amazon']
+      when: ansible_distribution in ['CentOS', 'Amazon', 'RedHat']
       notify: restart postgresql
 
     # Set postgres password for local connections
@@ -75,8 +89,6 @@
         name: "postgres"
         password: "{{ db_password }}"
         role_attr_flags: "SUPERUSER"
-        become: yes
-        become_user: "postgres"
 
     # Create application user and database
     - name: Create PostgreSQL user
@@ -85,16 +97,12 @@
         password: "{{ db_password }}"
         role_attr_flags: "CREATEDB,LOGIN"
         state: present
-        become: yes
-        become_user: "postgres"
 
     - name: Create database
       postgresql_db:
         name: "{{ db_name }}"
         owner: "{{ db_user }}"
         state: present
-        become: yes
-        become_user: "postgres"
 
   handlers:
     - name: restart postgresql
