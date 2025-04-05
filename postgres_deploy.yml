@@ -21,7 +21,7 @@
       when: ansible_distribution == 'Ubuntu'
 
     - name: Install PostgreSQL (Fedora)
-      dnf:
+      ansible.builtin.dnf:  # Changed from dnf to ansible.builtin.dnf
         name:
           - "postgresql-server"
           - "postgresql-contrib"
@@ -38,10 +38,18 @@
         state: present
       when: ansible_distribution == 'Amazon'
 
-    # Initialize DB
+    # Initialize DB - Skip if already initialized
+    - name: Check if PostgreSQL data directory exists (Non-Ubuntu)
+      stat:
+        path: /var/lib/pgsql/data
+      register: pg_data_dir
+      when: ansible_distribution != 'Ubuntu'
+
     - name: Initialize PostgreSQL DB (Non-Ubuntu)
       command: "/usr/bin/postgresql-setup --initdb"
-      when: ansible_distribution != 'Ubuntu'
+      when: 
+        - ansible_distribution != 'Ubuntu'
+        - not pg_data_dir.stat.exists
       notify: restart postgresql
 
     # Configure service
@@ -51,10 +59,17 @@
         state: started
         enabled: yes
 
-    # Configure authentication
+    # Configure authentication - Simplified path detection
+    - name: Find PostgreSQL version (Ubuntu)
+      shell: |
+        pg_lsclusters | awk 'NR==1 {print $1}'
+      register: pg_version
+      when: ansible_distribution == 'Ubuntu'
+      changed_when: false
+
     - name: Configure password authentication (Ubuntu)
       lineinfile:
-        path: "/etc/postgresql/{{ ansible_facts.pkg_mgr == 'apt' and (ansible_facts.apt_packages|selectattr('name', 'match', 'postgresql-[0-9]+')|first).name.split('-')[1] }}/main/pg_hba.conf"
+        path: "/etc/postgresql/{{ pg_version.stdout }}/main/pg_hba.conf"
         regexp: "^host\\s+all\\s+all\\s+127.0.0.1/32\\s+"
         line: "host    all             all             127.0.0.1/32            md5"
       when: ansible_distribution == 'Ubuntu'
@@ -68,26 +83,26 @@
       when: ansible_distribution != 'Ubuntu'
       notify: restart postgresql
 
-    # Database setup
+    # Database setup - Fixed user/database names to use variables
     - name: Set postgres user password
       postgresql_user:
-        name: "chinelo"
-        password: "{{ chinelo }}"
+        name: "postgres"
+        password: "{{ db_password }}"
         role_attr_flags: "SUPERUSER"
         login_unix_socket: "/var/run/postgresql"
-        login_user: "chinelo"
+        login_user: "postgres"
 
     - name: Create PostgreSQL user
       postgresql_user:
-        name: "{{ chinelo }}"
-        password: "{{ chinelo }}"
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
         role_attr_flags: "CREATEDB,LOGIN"
         state: present
 
     - name: Create database
       postgresql_db:
-        name: "{{ chinelo }}"
-        owner: "{{ chinelo }}"
+        name: "{{ db_name }}"
+        owner: "{{ db_user }}"
         state: present
 
   handlers:
@@ -95,4 +110,4 @@
       service:
         name: postgresql
         state: restarted
-...
+...        
