@@ -1,0 +1,101 @@
+---
+- name: Deploy PostgreSQL with cross-platform support
+  hosts: g1
+  become: yes
+  vars:
+    postgres_version: "14"  # Updated to more common version
+    db_user: "app_user"
+    db_password: "your_secure_password"
+    db_name: "shared_db"
+
+  tasks:
+    # Install PostgreSQL - Fixed for each OS
+    - name: Install PostgreSQL (Ubuntu/Debian)
+      apt:
+        name: 
+          - "postgresql"
+          - "postgresql-contrib"
+          - "libpq-dev"
+          - "python3-psycopg2"
+        state: present
+        update_cache: yes
+      when: ansible_distribution in ['Ubuntu', 'Debian']
+
+    - name: Install PostgreSQL (CentOS/RHEL 9)
+      dnf:
+        name:
+          - "postgresql-server"
+          - "postgresql-contrib"
+          - "python3-psycopg2"
+        state: present
+      when: ansible_distribution == 'CentOS'
+
+    - name: Install PostgreSQL (Amazon Linux 2023)
+      dnf:  # Amazon Linux 2023 uses dnf
+        name:
+          - "postgresql15-server"  # AL2023 uses versioned packages
+          - "postgresql15-contrib"
+          - "python3-psycopg2"
+        state: present
+      when: ansible_distribution == 'Amazon'
+
+    # Initialize DB for CentOS/Amazon
+    - name: Initialize PostgreSQL DB (CentOS/Amazon)
+      command: "postgresql-setup --initdb"
+      when: ansible_distribution in ['CentOS', 'Amazon']
+      notify: restart postgresql
+
+    # Configure service
+    - name: Ensure PostgreSQL is running and enabled
+      service:
+        name: postgresql
+        state: started
+        enabled: yes
+
+    # Configure PostgreSQL connection
+    - name: Set PostgreSQL connection facts
+      set_fact:
+        postgres_connection: 
+          login_host: "localhost"
+          login_user: "postgres"
+          login_password: ""
+          port: 5432
+      when: ansible_distribution in ['Ubuntu', 'Debian']
+
+    - name: Set PostgreSQL connection facts (RHEL)
+      set_fact:
+        postgres_connection: 
+          login_host: "localhost"
+          login_user: "postgres"
+          login_unix_socket: "/var/run/postgresql/.s.PGSQL.5432"
+          port: 5432
+      when: ansible_distribution in ['CentOS', 'Amazon']
+
+    # Database setup
+    - name: Create PostgreSQL user
+      postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        role_attr_flags: "CREATEDB,LOGIN"
+        state: present
+        login_host: "{{ postgres_connection.login_host }}"
+        login_user: "{{ postgres_connection.login_user }}"
+        login_password: "{{ postgres_connection.login_password }}"
+        login_unix_socket: "{{ postgres_connection.login_unix_socket | default(omit) }}"
+
+    - name: Create database
+      postgresql_db:
+        name: "{{ db_name }}"
+        owner: "{{ db_user }}"
+        state: present
+        login_host: "{{ postgres_connection.login_host }}"
+        login_user: "{{ postgres_connection.login_user }}"
+        login_password: "{{ postgres_connection.login_password }}"
+        login_unix_socket: "{{ postgres_connection.login_unix_socket | default(omit) }}"
+
+  handlers:
+    - name: restart postgresql
+      service:
+        name: postgresql
+        state: restarted
+...          
