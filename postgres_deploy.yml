@@ -21,7 +21,7 @@
       when: ansible_distribution == 'Ubuntu'
 
     - name: Install PostgreSQL (Fedora)
-      ansible.builtin.dnf:  # Changed from dnf to ansible.builtin.dnf
+      ansible.builtin.dnf:  # Use the full module name
         name:
           - "postgresql-server"
           - "postgresql-contrib"
@@ -59,10 +59,10 @@
         state: started
         enabled: yes
 
-    # Configure authentication - Simplified path detection
-    - name: Find PostgreSQL version (Ubuntu)
+    # Configure authentication - More reliable version detection
+    - name: Get PostgreSQL version (Ubuntu)
       shell: |
-        pg_lsclusters | awk 'NR==1 {print $1}'
+        ls /etc/postgresql | head -n 1
       register: pg_version
       when: ansible_distribution == 'Ubuntu'
       changed_when: false
@@ -72,7 +72,9 @@
         path: "/etc/postgresql/{{ pg_version.stdout }}/main/pg_hba.conf"
         regexp: "^host\\s+all\\s+all\\s+127.0.0.1/32\\s+"
         line: "host    all             all             127.0.0.1/32            md5"
-      when: ansible_distribution == 'Ubuntu'
+      when: 
+        - ansible_distribution == 'Ubuntu'
+        - pg_version.stdout != ''
       notify: restart postgresql
 
     - name: Configure password authentication (Non-Ubuntu)
@@ -83,14 +85,24 @@
       when: ansible_distribution != 'Ubuntu'
       notify: restart postgresql
 
-    # Database setup - Fixed user/database names to use variables
-    - name: Set postgres user password
+    # Database setup - Ensure proper authentication
+    - name: Set postgres user password (Ubuntu)
       postgresql_user:
         name: "postgres"
         password: "{{ db_password }}"
         role_attr_flags: "SUPERUSER"
         login_unix_socket: "/var/run/postgresql"
         login_user: "postgres"
+      when: ansible_distribution == 'Ubuntu'
+
+    - name: Set postgres user password (Non-Ubuntu)
+      postgresql_user:
+        name: "postgres"
+        password: "{{ db_password }}"
+        role_attr_flags: "SUPERUSER"
+        login_host: "localhost"
+        login_user: "postgres"
+      when: ansible_distribution != 'Ubuntu'
 
     - name: Create PostgreSQL user
       postgresql_user:
@@ -110,4 +122,4 @@
       service:
         name: postgresql
         state: restarted
-...        
+...
