@@ -1,9 +1,9 @@
 ---
-- hosts: all
+- hosts: g1
   become: true
   vars:
     ansible_remote_tmp: /tmp/.ansible
-    
+
 - include_role:
     name: update_cache
 
