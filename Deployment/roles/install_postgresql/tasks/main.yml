@@ -19,7 +19,7 @@
   postgresql_db:
     state: present
     name: "{{ db_name }}"
-  become: yes
+  become: true
   become_user: postgres
 
 
@@ -28,7 +28,7 @@
     state: present
     name: "{{ db_user }}"
     password: "{{ db_password }}"
-  become: yes
+  become: true
   become_user: postgres
 
 - name: "Grant db user access to app db"
@@ -38,6 +38,6 @@
     roles: "{{ db_user }}"
     grant_option: no
     privs: all
-  become: yes
+  become: true
   become_user: postgres  
 ...
