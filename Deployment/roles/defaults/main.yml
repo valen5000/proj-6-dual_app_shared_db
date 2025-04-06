@@ -1,0 +1,6 @@
+---
+db_name: "sharedappdb"
+db_user: "appuser"
+db_password: "default_password_should_be_overridden"
+postgres_admin_password: "default_postgres_password_should_be_overridden"
+...
