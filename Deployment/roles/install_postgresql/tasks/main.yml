@@ -14,13 +14,6 @@
     state: present
   when: ansible_distribution == "Amazon" or ansible_distribution == "CentOs"
 
-- name: Ensure Ansible temp directory exists
-  file:
-    path: /tmp/ansible-postgres
-    state: directory
-    mode: '0700'
-
-
 - name: "Create app database"
   postgresql_db:
     state: present
