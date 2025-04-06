@@ -3,7 +3,7 @@
   hosts: ubuntu, redhat, centos
   become: true
   vars_files:
-    ansible_remote_tmp: /tmp/.ansible
+    - vars.yml
   roles:
     - install_postgresql
     - flask
