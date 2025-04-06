@@ -1,8 +1,4 @@
 ---
-- name: Set ansible configuration to disable ACLs
-  set_fact:
-    ansible_become_flags: ""
-
 - include_role:
     name: update_cache
 
@@ -18,21 +14,14 @@
     state: present
   when: ansible_distribution == "Amazon" or ansible_distribution == "CentOs"
 
-- name: Create dedicated ansible temp directory
+- name: Ensure Ansible temp directory exists
   file:
-    path: /var/lib/ansible-tmp
-    state: directory
-    owner: root
-    group: root
-    mode: '1777'
-
-- name: Create postgres-specific temp directory
-  file:
-    path: /var/lib/ansible-tmp/postgres
+    path: /tmp/ansible-postgres
     state: directory
     owner: postgres
     group: postgres
     mode: '0700'
+    
 
 - name: "Create app database"
   postgresql_db:
@@ -40,11 +29,8 @@
     name: "{{ db_name }}"
   become: true
   become_user: postgres
-  vars:
-    ansible_become_flags: ""
   environment:
-    ANSIBLE_REMOTE_TMP: /var/lib/ansible-tmp/postgres
-    ANSIBLE_TMP_DIR: /var/lib/ansible-tmp/postgres
+    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
 
 - name: "Create db user"
   postgresql_user:
@@ -53,11 +39,8 @@
     password: "{{ db_password }}"
   become: true
   become_user: postgres
-  vars:
-    ansible_become_flags: ""
   environment:
-    ANSIBLE_REMOTE_TMP: /var/lib/ansible-tmp/postgres
-    ANSIBLE_TMP_DIR: /var/lib/ansible-tmp/postgres
+    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
 
 - name: "Grant db user access to app db"
   postgresql_privs:
@@ -68,22 +51,12 @@
     privs: all
   become: true
   become_user: postgres
-  vars:
-    ansible_become_flags: ""
   environment:
-    ANSIBLE_REMOTE_TMP: /var/lib/ansible-tmp/postgres
-    ANSIBLE_TMP_DIR: /var/lib/ansible-tmp/postgres
+    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
 
-- name: "Find pg_hba.conf location"
-  become: true
-  become_user: postgres
-  command: psql -t -c "SHOW hba_file;"
-  register: pg_hba_path
-  changed_when: false
-  
 - name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
-    dest: "{{ pg_hba_path.stdout.strip() }}"
+    dest: "~/data/pg_hba.conf"
     contype: host
     databases: all
     method: md5
@@ -91,7 +64,5 @@
     create: true
   become: true
   become_user: postgres
-  vars:
-    ansible_become_flags: ""
-  notify: restart postgres
+  notify: restart postgres  
 ...
