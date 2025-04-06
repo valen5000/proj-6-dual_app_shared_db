@@ -8,6 +8,6 @@
     
 - name: Git checkout
   ansible.builtin.git:
-    repo: 'git@github.com:valen5000/proj-6-dual_app_shared_db.git'
+    repo: 'https://github.com/valen5000/proj-6-dual_app_shared_db.git'
     dest: /opt/flask-app
-    key_file: /home/ubuntu/.ssh/chinelo.pem
+    
