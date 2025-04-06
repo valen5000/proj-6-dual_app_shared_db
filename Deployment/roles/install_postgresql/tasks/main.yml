@@ -53,13 +53,7 @@
   become_user: postgres
   environment:
     ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
-    
-- name: "Find pg_hba.conf location"
-  become: true
-  become_user: postgres
-  command: psql -t -c "SHOW hba_file;"
-  register: pg_hba_path
-  changed_when: false
+
 
 - name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
