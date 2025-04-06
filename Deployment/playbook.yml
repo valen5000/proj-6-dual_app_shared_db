@@ -7,6 +7,5 @@
   roles:
     - install_postgresql
     - flask
-    - node
     - setup_service
 ...
