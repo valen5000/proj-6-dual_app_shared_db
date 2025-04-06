@@ -3,5 +3,5 @@
   become: true
   roles:
     - install_postgresql
-    - install_flask
-    - copy_app
+    - flask
+    - setup_service

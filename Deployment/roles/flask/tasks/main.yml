@@ -1,5 +1,5 @@
 - include_role:
-    name: install_python
+    name: python
 
 - name: Install Flask (Ubuntu)
   apt:
