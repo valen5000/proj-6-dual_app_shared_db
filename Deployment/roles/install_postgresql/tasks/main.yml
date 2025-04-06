@@ -20,8 +20,7 @@
     state: directory
     owner: postgres
     group: postgres
-    mode: '0700'
-    setfacl: false 
+    mode: '0700' 
 
 
 - name: "Create app database"
