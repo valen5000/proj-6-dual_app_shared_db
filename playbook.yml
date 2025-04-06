@@ -1,8 +1,0 @@
----
-- name: Test Ansible Inventory
-  hosts: g1
-  tasks:
-    - name: Ping all servers
-      ansible.builtin.ping:
-...
-

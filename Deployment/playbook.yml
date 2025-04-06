@@ -1,0 +1,7 @@
+- name: Application Deployment
+  hosts: ubuntu, redhat, centos
+  become: true
+  roles:
+    - install_postgresql
+    - install_flask
+    - copy_app

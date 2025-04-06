@@ -1,0 +1,14 @@
+- include_role:
+    name: install_python
+
+- name: Install Flask (Ubuntu)
+  apt:
+    name: python3-flask
+    state: present
+  when: ansible_distribution=="Ubuntu"
+
+- name: Install Flask (Amazon | Centos)
+  yum:
+    name: python3-flask
+    state: present
+  when: ansible_distribution=="Amazon" or ansible_distribution=="CentOs"
