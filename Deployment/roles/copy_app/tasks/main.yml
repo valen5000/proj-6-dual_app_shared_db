@@ -5,9 +5,18 @@
   file:
     path: /opt/flask-app
     state: directory
+
+- name: Create Node App Directory
+  file:
+    path: /opt/node-app
+    state: directory
     
-- name: Git checkout
+- name: Git checkout flask-app
   ansible.builtin.git:
     repo: 'https://github.com/valen5000/proj-6-dual_app_shared_db.git'
     dest: /opt/flask-app
     
+- name: Git checkout node-app
+  ansible.builtin.git:
+    repo: 'https://github.com/valen5000/proj-6-dual_app_shared_db.git'
+    dest: /opt/node-app    
