@@ -30,7 +30,7 @@
 
 
 - name: Create Node Service
-  cop:
+  copy:
     dest: /etc/systemd/system/node-app.service
     content: |
       [Unit]
