@@ -1,125 +1,33 @@
 ---
-- name: Validate required variables
-  assert:
-    that:
-      - db_name is defined
-      - db_user is defined
-      - db_password is defined
-      - postgres_admin_password is defined
-    fail_msg: "Required database variables not defined. Ensure these are set in defaults/main.yml or passed as variables."
-
-- name: Set PostgreSQL connection parameters
-  set_fact:
-    ansible_become_flags: ""
-    postgres_connection_params:
-      login_user: postgres
-      login_password: "{{ postgres_admin_password }}"
-      login_host: localhost
-      login_unix_socket: /var/run/postgresql
-
-- name: Update package cache (Ubuntu)
+- name: Install PostgreSQL packages
   apt:
+    name: postgresql postgresql-contrib
+    state: present
     update_cache: yes
   when: ansible_distribution == "Ubuntu"
+  tags: install
 
-- name: Install postgresql (Ubuntu)
-  apt:
-    name:
-      - postgresql
-      - postgresql-contrib
-    state: present
-  when: ansible_distribution == "Ubuntu"
-
-- name: Install postgresql (Amazon/CentOS)
-  yum:
-    name:
-      - postgresql
-      - postgresql-server
-    state: present
-  when: ansible_distribution in ["Amazon", "CentOS"]
-
-- name: Ensure PostgreSQL service is running
-  service:
-    name: postgresql
-    state: started
-    enabled: yes
-
-- name: Create Ansible temp directory
-  file:
-    path: /var/tmp/ansible-postgres
-    state: directory
-    owner: postgres
-    group: postgres
-    mode: '0700'
-
-- name: Set postgres admin password
-  postgresql_user:
-    name: postgres
-    password: "{{ postgres_admin_password }}"
-    role_attr_flags: "SUPERUSER"
-  become: true
-  become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
-
-- name: Find pg_hba.conf location
-  command: psql -t -c "SHOW hba_file;"
-  register: pg_hba_path
-  changed_when: false
-  become: true
-  become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
-
-- name: Create application database
+- name: Create database
   postgresql_db:
     name: "{{ db_name }}"
-    state: present
-    login_user: postgres
-    login_password: "{{ postgres_admin_password }}"
   become: true
   become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
+  tags: db
 
 - name: Create database user
   postgresql_user:
     name: "{{ db_user }}"
     password: "{{ db_password }}"
-    login_user: postgres
-    login_password: "{{ postgres_admin_password }}"
   become: true
   become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
+  tags: user
 
-- name: Grant user privileges
+- name: Grant privileges
   postgresql_privs:
-    type: database
     database: "{{ db_name }}"
     roles: "{{ db_user }}"
     privs: ALL
-    grant_option: no
-    login_user: postgres
-    login_password: "{{ postgres_admin_password }}"
   become: true
   become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
-
-- name: Configure client authentication
-  postgresql_pg_hba:
-    dest: "{{ pg_hba_path.stdout.strip() }}"
-    contype: host
-    databases: all
-    users: "{{ db_user }}"
-    address: '127.0.0.1/32'
-    method: md5
-    create: yes
-  become: true
-  become_user: postgres
-  notify: Restart PostgreSQL
-
-- name: Restart PostgreSQL handler
-  meta: flush_handlers
+  tags: privileges
 ...
