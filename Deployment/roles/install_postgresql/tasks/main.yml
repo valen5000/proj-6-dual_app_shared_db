@@ -26,7 +26,7 @@
 - name: "Create app database"
   postgresql_db:
     state: present
-    name: "{{ sharedappdb }}"
+    name: "{{ db_name }}"
   become: true
   become_user: postgres
   environment:
@@ -35,8 +35,8 @@
 - name: "Create db user"
   postgresql_user:
     state: present
-    name: "{{ postgres }}"
-    password: "{{ postgres }}"
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
   become: true
   become_user: postgres
   environment:
@@ -45,8 +45,8 @@
 - name: "Grant db user access to app db"
   postgresql_privs:
     type: database
-    database: "{{ sharedappdb }}"
-    roles: "{{ postgres }}"
+    database: "{{ db_name }}"
+    roles: "{{ db_user }}"
     grant_option: no
     privs: all
   become: true
@@ -60,7 +60,7 @@
     contype: host
     databases: all
     method: md5
-    users: "{{ postgres }}"
+    users: "{{ db_user }}"
     create: true
   become: true
   become_user: postgres
