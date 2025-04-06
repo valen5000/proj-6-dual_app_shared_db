@@ -23,39 +23,36 @@
     mode: '0700'
     
 
-- name: Create app database
-  become: true
-  become_user: postgres
-  environment:
-    PGPASSWORD: "{{ db_password }}" 
+- name: "Create app database"
   postgresql_db:
-    name: "{{ db_name }}"
     state: present
-
-
-- name: Create database user
+    name: "{{ sharedappdb }}"
   become: true
   become_user: postgres
   environment:
-    PGPASSWORD: "{{ db_password }}" 
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
+
+- name: "Create db user"
   postgresql_user:
-    name: "{{ db_user }}"
-    password: "{{ db_password }}"
     state: present
-
-
-- name: Grant db user access to app db
+    name: "{{ postgres }}"
+    password: "{{ postgres }}"
   become: true
   become_user: postgres
   environment:
-    PGPASSWORD: "{{ db_password }}" 
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
+
+- name: "Grant db user access to app db"
   postgresql_privs:
     type: database
-    database: "{{ db_name }}"
-    roles: "{{ db_user }}"
-    privs: all
+    database: "{{ sharedappdb }}"
+    roles: "{{ postgres }}"
     grant_option: no
-
+    privs: all
+  become: true
+  become_user: postgres
+  environment:
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
 - name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
@@ -63,7 +60,7 @@
     contype: host
     databases: all
     method: md5
-    users: "{{ db_user }}"
+    users: "{{ postgres }}"
     create: true
   become: true
   become_user: postgres
