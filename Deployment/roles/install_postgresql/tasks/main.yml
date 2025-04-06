@@ -18,10 +18,8 @@
   file:
     path: /tmp/ansible-postgres
     state: directory
-    owner: postgres
-    group: postgres
     mode: '0700'
-    
+
 
 - name: "Create app database"
   postgresql_db:
@@ -29,8 +27,7 @@
     name: "{{ db_name }}"
   become: true
   become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
+
 
 - name: "Create db user"
   postgresql_user:
@@ -39,8 +36,7 @@
     password: "{{ db_password }}"
   become: true
   become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
+
 
 - name: "Grant db user access to app db"
   postgresql_privs:
@@ -51,12 +47,11 @@
     privs: all
   become: true
   become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
+
 
 - name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
-    dest: "~/data/pg_hba.conf"
+    dest: "/var/lib/pgsql/data/pg_hba.conf"
     contype: host
     databases: all
     method: md5
