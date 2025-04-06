@@ -1,3 +1,4 @@
+---
 - include_role:
     name: python
 
@@ -12,3 +13,4 @@
     name: python3-flask
     state: present
   when: ansible_distribution=="Amazon" or ansible_distribution=="CentOs"
+...

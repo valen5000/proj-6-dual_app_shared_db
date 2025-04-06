@@ -1,3 +1,4 @@
+---
 plugin: amazon.aws.aws_ec2
 aws_profile: default
 
@@ -9,3 +10,4 @@ groups:
   ubuntu: "'ubuntu' in tags.OS"
   amazon: "'amazon' in tags.OS"
   centos: "'centos' in tags.OS"
+...

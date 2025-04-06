@@ -1,3 +1,4 @@
+---
 - name: Update Apt Cache (Ubuntu)
   apt:
     update_cache: yes
@@ -7,3 +8,4 @@
   yum:
     update_cache: yes
   when: ansible_distribution == "Amazon" or ansible_distribution == "CentOs"
+...

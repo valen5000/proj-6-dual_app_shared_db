@@ -1,3 +1,4 @@
+---
 - name: Application Deployment
   hosts: ubuntu, redhat, centos
   become: true
@@ -5,3 +6,4 @@
     - install_postgresql
     - flask
     - setup_service
+...

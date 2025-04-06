@@ -1,3 +1,4 @@
+---
 - include_role:
     name: copy_app
 
@@ -55,3 +56,4 @@
     name: node-app
     state: restarted
     enabled: yes
+...
