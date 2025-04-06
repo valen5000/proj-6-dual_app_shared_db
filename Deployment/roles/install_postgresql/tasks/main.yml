@@ -29,7 +29,7 @@
   become: true
   become_user: postgres
   environment:
-    ANSIBLE_REMOTE_TMP: "{{ ansible_tmp_dir }}"
+    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
 
 - name: "Create db user"
   postgresql_user:
@@ -39,7 +39,7 @@
   become: true
   become_user: postgres
   environment:
-    ANSIBLE_REMOTE_TMP: "{{ ansible_tmp_dir }}"
+    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
 
 - name: "Grant db user access to app db"
   postgresql_privs:
@@ -51,7 +51,7 @@
   become: true
   become_user: postgres
   environment:
-    ANSIBLE_REMOTE_TMP: "{{ ansible_tmp_dir }}"
+    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
 
 - name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
