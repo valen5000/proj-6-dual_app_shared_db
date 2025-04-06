@@ -1,0 +1,18 @@
+- include_role:
+    name: update_cache
+
+- name: Install Node (Ubuntu)
+  apt:
+    name: 
+      - node
+      - npm
+    state: present
+  when: ansible_distribution=="Ubuntu"
+
+- name: Install Node (Amazon | Centos)
+  yum:
+    name: 
+      - node
+      - npm
+    state: present
+  when: ansible_distribution=="Amazon" or ansible_distribution=="CentOs"

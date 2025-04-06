@@ -27,3 +27,31 @@
     name: flask-app
     state: restarted
     enabled: yes
+
+
+- name: Create Node Service
+  cop:
+    dest: /etc/systemd/system/node-app.service
+    content: |
+      [Unit]
+      Description = Node App
+      After = network.target
+
+      [Service]
+      WorkingDirectory = /opt/node-app
+      ExecStart = node /opt/node-app/node_app/index.js
+      Restart = always
+      RestartSec = 5s
+
+      StandardOutput = append:/var/log/node-app.log
+      StandardError = append:/var/log/node-error.log
+
+      [Install]
+      WantedBy = multi_user.target
+
+- name: Reload Systemd and Start Node App
+  systemd:
+    daemon_reload: yes
+    name: node-app
+    state: restarted
+    enabled: yes
