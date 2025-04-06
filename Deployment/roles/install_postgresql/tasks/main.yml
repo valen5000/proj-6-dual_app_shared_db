@@ -21,6 +21,7 @@
     owner: postgres
     group: postgres
     mode: '0700'
+    setype: user_tmp_t
 
 - name: "Create app database"
   postgresql_db:
@@ -52,16 +53,23 @@
   become_user: postgres
   environment:
     ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
+    
+- name: "Find pg_hba.conf location"
+  become: true
+  become_user: postgres
+  command: psql -t -c "SHOW hba_file;"
+  register: pg_hba_path
+  changed_when: false
 
 - name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
-    dest: "~/data/pg_hba.conf"
+    dest: "{{ pg_hba_path.stdout.strip() }}"
     contype: host
     databases: all
     method: md5
     users: "{{ db_user }}"
     create: true
-  become: yes
+  become: true
   become_user: postgres
   notify: restart postgres  
 ...
