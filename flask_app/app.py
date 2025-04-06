@@ -9,7 +9,7 @@ DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASS = os.getenv("DB_PASS", "postgres")
 
 def get_data():
-    conn = psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER, password=DB_PASS)
+    conn = psycopg2.connect(host=DB_HOST, database=DB_NAME, user=DB_USER)
     cur = conn.cursor()
     cur.execute("SELECT name FROM devs")
     rows = cur.fetchall()

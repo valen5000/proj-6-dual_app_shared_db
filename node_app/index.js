@@ -5,7 +5,7 @@ const app = express();
 const pool = new Pool({
   host: 'localhost',
   user: 'postgres',
-  password: 'postgres',
+  // password: 'postgres',
   database: 'sharedappdb'
 });
 
