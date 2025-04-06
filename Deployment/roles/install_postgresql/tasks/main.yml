@@ -1,9 +1,4 @@
 ---
-- hosts: g1
-  become: true
-  vars:
-    ansible_remote_tmp: /tmp/.ansible
-
 - include_role:
     name: update_cache
 
@@ -18,6 +13,7 @@
     name: postgresql
     state: present
   when: ansible_distribution == "Amazon" or ansible_distribution == "CentOs"
+    
 
 - name: "Create app database"
   postgresql_db:
@@ -25,7 +21,6 @@
     name: "{{ db_name }}"
   become: true
   become_user: postgres
-
 
 - name: "Create db user"
   postgresql_user:
@@ -49,7 +44,7 @@
 
 - name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
-    dest: "/var/lib/pgsql/data/pg_hba.conf"
+    dest: "~/data/pg_hba.conf"
     contype: host
     databases: all
     method: md5
