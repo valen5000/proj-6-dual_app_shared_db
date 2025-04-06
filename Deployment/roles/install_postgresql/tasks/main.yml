@@ -16,12 +16,13 @@
 
 - name: Ensure Ansible temp directory exists
   file:
-    path: /tmp/ansible-postgres
+    path: /var/tmp/ansible-postgres
     state: directory
     owner: postgres
     group: postgres
     mode: '0700'
-    
+    setfacl: false 
+
 
 - name: "Create app database"
   postgresql_db:
@@ -29,8 +30,10 @@
     name: "{{ db_name }}"
   become: true
   become_user: postgres
+  vars:
+    ansible_become_flags: ""
   environment:
-    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
 - name: "Create db user"
   postgresql_user:
@@ -39,8 +42,10 @@
     password: "{{ db_password }}"
   become: true
   become_user: postgres
+  vars:
+    ansible_become_flags: ""
   environment:
-    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
 - name: "Grant db user access to app db"
   postgresql_privs:
@@ -51,13 +56,22 @@
     privs: all
   become: true
   become_user: postgres
+  vars:
+    ansible_become_flags: ""
   environment:
-    ANSIBLE_REMOTE_TMP: /tmp/ansible-postgres
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
+
+- name: "Find pg_hba.conf location"
+  become: true
+  become_user: postgres
+  command: psql -t -c "SHOW hba_file;"
+  register: pg_hba_path
+  changed_when: false    
 
 
 - name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
-    dest: "~/data/pg_hba.conf"
+    dest: "{{ pg_hba_path.stdout.strip() }}"
     contype: host
     databases: all
     method: md5
@@ -65,5 +79,7 @@
     create: true
   become: true
   become_user: postgres
+  vars:
+    ansible_become_flags: ""
   notify: restart postgres  
 ...
