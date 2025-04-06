@@ -1,33 +1,24 @@
 ---
-- name: Install PostgreSQL packages
-  apt:
-    name: postgresql postgresql-contrib
+- name: Install PostgreSQL
+  package:
+    name: "{{ 'postgresql postgresql-contrib' if ansible_distribution == 'Ubuntu' else 'postgresql-server' }}"
     state: present
-    update_cache: yes
-  when: ansible_distribution == "Ubuntu"
-  tags: install
 
-- name: Create database
+- name: Initialize DB (CentOS/Amazon)
+  command: postgresql-setup initdb
+  when: ansible_distribution in ["CentOS", "Amazon"]
+
+- name: Start PostgreSQL
+  service:
+    name: postgresql
+    state: started
+    enabled: yes
+
+- name: Create database with proper auth
   postgresql_db:
     name: "{{ db_name }}"
+    login_user: postgres
+    login_unix_socket: /var/run/postgresql
   become: true
   become_user: postgres
-  tags: db
-
-- name: Create database user
-  postgresql_user:
-    name: "{{ db_user }}"
-    password: "{{ db_password }}"
-  become: true
-  become_user: postgres
-  tags: user
-
-- name: Grant privileges
-  postgresql_privs:
-    database: "{{ db_name }}"
-    roles: "{{ db_user }}"
-    privs: ALL
-  become: true
-  become_user: postgres
-  tags: privileges
 ...
