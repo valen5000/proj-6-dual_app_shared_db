@@ -29,7 +29,7 @@
   environment:
     PGPASSWORD: "{{ db_password }}" 
   postgresql_db:
-    name: "{{ sharedappdb }}"
+    name: "{{ db_name }}"
     state: present
 
 
@@ -51,7 +51,7 @@
     PGPASSWORD: "{{ db_password }}" 
   postgresql_privs:
     type: database
-    database: "{{ sharedappdb }}"
+    database: "{{ db_name }}"
     roles: "{{ db_user }}"
     privs: all
     grant_option: no
