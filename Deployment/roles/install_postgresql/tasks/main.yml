@@ -27,7 +27,7 @@
   become: true
   become_user: postgres
   environment:
-    PGPASSWORD: "{{ db_password }}"
+    PGPASSWORD: "{{ db_password }}" 
   postgresql_db:
     name: "{{ db_name }}"
     state: present
@@ -37,7 +37,7 @@
   become: true
   become_user: postgres
   environment:
-    PGPASSWORD: "{{ db_password }}"
+    PGPASSWORD: "{{ db_password }}" 
   postgresql_user:
     name: "{{ db_user }}"
     password: "{{ db_password }}"
@@ -48,7 +48,7 @@
   become: true
   become_user: postgres
   environment:
-    PGPASSWORD: "{{ db_password }}"
+    PGPASSWORD: "{{ db_password }}" 
   postgresql_privs:
     type: database
     database: "{{ db_name }}"
