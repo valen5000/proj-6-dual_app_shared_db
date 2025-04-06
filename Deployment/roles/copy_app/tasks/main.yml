@@ -19,4 +19,8 @@
 - name: Git checkout node-app
   ansible.builtin.git:
     repo: 'https://github.com/valen5000/proj-6-dual_app_shared_db.git'
-    dest: /opt/node-app    
+    dest: /opt/node-app   
+
+- name: Install packages based on package.json.
+  community.general.npm:
+    path: /opt/node-app/node_app/
