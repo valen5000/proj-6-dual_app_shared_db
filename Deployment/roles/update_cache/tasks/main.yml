@@ -4,8 +4,8 @@
     update_cache: yes
   when: ansible_distribution == "Ubuntu"
 
-- name: Update Yum Cache (Amazon|Redhat|CentOs)
+- name: Update Yum Cache (Amazon|Redhat|RedHat)
   yum:
     update_cache: yes
-  when: ansible_distribution == "Amazon" or ansible_distribution == "CentOs"
+  when: ansible_distribution == "Amazon" or ansible_distribution == "RedHat"
 ...

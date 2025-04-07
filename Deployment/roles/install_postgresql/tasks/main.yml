@@ -1,57 +1,30 @@
 ---
 - include_role:
     name: update_cache
-  
-- name: Install packages
-  ansible.builtin.yum:
-    name: 
-      - postgresql
-      - postgresql-server
-      - postgresql-contrib
-      - postgresql-libs
-      - python3-psycopg2
-    state: present
 
-- name: Check if installed
-  ansible.builtin.stat:
-    path: "/var/lib/pgsql/data/pg_hba.conf"
-  register: postgres_data
-
-- name: Check if running
-  ansible.builtin.shell: "postgresql-setup initdb"
-  when: not postgres_data.stat.exists
-
-- name: Start and enable service
-  ansible.builtin.service:
+- name: Install postgresql (Ubuntu)
+  apt:
     name: postgresql
-    state: started
-    enabled: true
+    state: present
+  when: ansible_distribution == "Ubuntu"
 
-- name: Start and enable service
-  ansible.builtin.shell: "psql -f /home/ubuntu/ansible/proj-6-dual_app_shared_db/db/init.sql"
+- name: Install postgresql (Amazon|RedHat)
+  yum:
+    name: postgresql
+    state: present
+  when: ansible_distribution == "Amazon" or ansible_distribution == "RedHat"
+
+
+- name: Create app database
   become: true
   become_user: postgres
+  shell: psql -f /opt/node_app/db/init.sql
 
-
-# - name: Install postgresql
-#   import_role:
-#     name: linux-system-roles.postgresql
-#   become: yes
-#   become_user: root
-
-# - name: Initialize PostgreSQL
-#   shell: "postgresql-setup initdb"
-
-# - name: Start and enable the service
-#   service: "name={{item}} state=started enabled=yes"
-#   with_items:
-#     - postgresql
-
-# - name: "Create db user"
-#   community.postgresql.postgresql_user:
-#     state: present
-#     name: "{{ db_user }}"
-#     password: "{{ db_password }}"
-#   become: true
-#   become_user: postgres
+- name: "Create db user"
+  community.postgresql.postgresql_user:
+    state: present
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+  become: true
+  become_user: postgres
 ...

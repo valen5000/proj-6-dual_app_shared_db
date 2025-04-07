@@ -16,5 +16,5 @@
       - node
       - npm
     state: present
-  when: ansible_distribution=="Amazon" or ansible_distribution=="CentOs"
+  when: ansible_distribution=="Amazon" or ansible_distribution=="RedHat"
 ...
