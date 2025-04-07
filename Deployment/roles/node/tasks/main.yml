@@ -5,7 +5,7 @@
 - name: Install Node (Ubuntu)
   apt:
     name: 
-      - node
+      - nodejs
       - npm
     state: present
   when: ansible_distribution=="Ubuntu"
@@ -13,7 +13,7 @@
 - name: Install Node (Amazon | Centos)
   yum:
     name: 
-      - node
+      - nodejs
       - npm
     state: present
   when: ansible_distribution=="Amazon" or ansible_distribution=="RedHat"
