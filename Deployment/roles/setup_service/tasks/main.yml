@@ -1,7 +1,6 @@
 ---
 - include_role:
-    name: 
-      - update_cache
+    name: update_cache
 
 - name: Install postgresql (Ubuntu)
   apt:
