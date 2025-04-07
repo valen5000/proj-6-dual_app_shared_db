@@ -8,13 +8,18 @@
       - postgresql
       - postgresql-server
       - postgresql-contrib
+      - postgresql-libs
+      - python3-psycopg2
+    state: present
 
-- name: Install dependencies
-  yum: name={{ item }} state=present
-  become: true
-  with_items:
-    - wget
-    - python-psycopg2
+- name: Check is psql is installed and running
+  ansible.builtins.stat:
+    path: "/var/lib/pgsql/data/pg_hba.conf"
+  register: postgres_data
+
+- name: Initialize postgressql
+  ansible.builtins.shell: "postgresql-setup initdb"
+  when: not postgres_data.stat.exists
 
 # - name: Install postgresql
 #   import_role:
