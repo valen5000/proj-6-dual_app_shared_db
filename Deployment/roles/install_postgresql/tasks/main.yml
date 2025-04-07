@@ -10,7 +10,10 @@
 
 - name: Install postgresql (Amazon|RedHat)
   yum:
-    name: postgresql15
+    name:
+      - postgresql15
+      - postgresql15-server
+      - python3-psycopg2
     state: present
   when: ansible_distribution == "Amazon" or ansible_distribution == "RedHat"
 
@@ -21,5 +24,5 @@
     name: "{{ db_user }}"
     password: "{{ db_password }}"
   become: true
-  become_user: postgres
+  # become_user: postgres
 ...
