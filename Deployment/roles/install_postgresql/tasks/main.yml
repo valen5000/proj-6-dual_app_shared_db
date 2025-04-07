@@ -6,6 +6,10 @@
     - ../vars/vars.yml
 
   tasks:
+    - name: Include update cache role
+      include_role:
+        name: update_cache
+
     - name: Ensure APT cache is updated (Debian/Ubuntu)
       apt:
         update_cache: yes
@@ -23,7 +27,7 @@
         state: present
       when: ansible_distribution in ["Amazon", "CentOS"]
 
-    - name: Ensure Ansible PostgreSQL tmp dir exists
+    - name: Ensure Ansible PostgreSQL temp directory exists
       file:
         path: /var/tmp/ansible-postgres
         state: directory
@@ -69,4 +73,10 @@
         address: 0.0.0.0/0
       become_user: postgres
       notify: Restart PostgreSQL
+
+  handlers:
+    - name: Restart PostgreSQL
+      service:
+        name: postgresql
+        state: restarted
 ...
