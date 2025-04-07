@@ -10,7 +10,7 @@
 
 - name: Install postgresql (Amazon|RedHat)
   yum:
-    name: postgresql
+    name: postgresql15
     state: present
   when: ansible_distribution == "Amazon" or ansible_distribution == "RedHat"
 
