@@ -25,6 +25,6 @@
     state: present
     name: "{{ db_user }}"
     password: "{{ db_password }}"
-  become: true
-  become_user: postgres
+  # become: true
+  # become_user: postgres
 ...
