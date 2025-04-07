@@ -41,4 +41,8 @@
     password: "{{ db_password }}"
   become: true
   become_user: postgres
+
+- name: Create app database
+  become_user: postgres
+  shell: psql -f /opt/node-app/node_app/db/init.sql  
 ...
