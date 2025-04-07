@@ -2,19 +2,19 @@
 - include_role:
     name: update_cache
 
-- name: Install PostgreSQL on Ubuntu
+- name: Install postgresql (Ubuntu)
   apt:
     name: postgresql
     state: present
   when: ansible_distribution == "Ubuntu"
 
-- name: Install PostgreSQL on Amazon/CentOS
+- name: Install postgresql (Amazon|CentOs)
   yum:
-    name: postgresql-server
+    name: postgresql
     state: present
-  when: ansible_distribution in ["Amazon", "CentOS"]
+  when: ansible_distribution == "Amazon" or ansible_distribution == "CentOs"
 
-- name: Ensure Ansible PostgreSQL temp directory exists
+- name: Ensure Ansible temp directory exists
   file:
     path: /var/tmp/ansible-postgres
     state: directory
@@ -22,52 +22,46 @@
     group: postgres
     mode: '0700'
 
-- name: Create application database
+- name: "Create app database"
   postgresql_db:
-    name: "{{ db_name }}"
     state: present
+    name: "{{ db_name }}"
   become: true
   become_user: postgres
   environment:
     ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
-- name: Create DB user
+- name: "Create db user"
   postgresql_user:
+    state: present
     name: "{{ db_user }}"
     password: "{{ db_password }}"
-    state: present
   become: true
   become_user: postgres
   environment:
     ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
-- name: Grant privileges to DB user
+- name: "Grant db user access to app db"
   postgresql_privs:
+    type: database
     database: "{{ db_name }}"
     roles: "{{ db_user }}"
-    type: database
-    privs: ALL
     grant_option: no
+    privs: all
   become: true
   become_user: postgres
   environment:
     ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
-- name: Allow MD5 connection for db user
+- name: "Allow md5 connection for the db user"
   postgresql_pg_hba:
-    dest: "/var/lib/pgsql/data/pg_hba.conf"
+    dest: "~/data/pg_hba.conf"
     contype: host
-    users: "{{ db_user }}"
     databases: all
     method: md5
-    address: 0.0.0.0/0
+    users: "{{ db_user }}"
+    create: true
   become: true
   become_user: postgres
-  notify: Restart PostgreSQL
-
-- handlers:
-  - name: Restart PostgreSQL
-    service:
-      name: postgresql
-      state: restarted
+  notify: restart postgres  
 ...
