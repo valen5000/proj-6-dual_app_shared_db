@@ -40,5 +40,5 @@
     name: "{{ db_user }}"
     password: "{{ db_password }}"
   become: true
-  # become_user: postgres
+  become_user: postgres
 ...
