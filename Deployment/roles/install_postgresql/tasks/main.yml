@@ -2,36 +2,36 @@
 - include_role:
     name: update_cache
 
-# - name: Install postgresql (Ubuntu)
-#   apt:
-#     name: postgresql
-#     state: present
-#   when: ansible_distribution == "Ubuntu"
+- name: Update release
+  yum: epel-release
+  become: true
 
-- name: Install postgresql
-  import_role:
-    name: linux-system-roles.postgresql
-  become: yes
-  become_user: root
-
-- name: Initialize PostgreSQL
-  shell: "postgresql-setup initdb"
-
-- name: Start and enable the service
-  service: "name={{item}} state=started enabled=yes"
+- name: Install dependencies
+  yum: name={{ item }} state=present
+  become: true
   with_items:
-    - postgresql
+    - wget
+    - python-psycopg2
 
-# - name: Create app database
+# - name: Install postgresql
+#   import_role:
+#     name: linux-system-roles.postgresql
+#   become: yes
+#   become_user: root
+
+# - name: Initialize PostgreSQL
+#   shell: "postgresql-setup initdb"
+
+# - name: Start and enable the service
+#   service: "name={{item}} state=started enabled=yes"
+#   with_items:
+#     - postgresql
+
+# - name: "Create db user"
+#   community.postgresql.postgresql_user:
+#     state: present
+#     name: "{{ db_user }}"
+#     password: "{{ db_password }}"
 #   become: true
 #   become_user: postgres
-#   shell: psql -f /opt/node_app/db/init.sql
-
-- name: "Create db user"
-  community.postgresql.postgresql_user:
-    state: present
-    name: "{{ db_user }}"
-    password: "{{ db_password }}"
-  become: true
-  become_user: postgres
 ...
