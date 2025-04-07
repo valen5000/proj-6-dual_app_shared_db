@@ -4,8 +4,8 @@
 
 - name: Ensure EPEL is enabled (required for many extras)
   yum:
-    name: epel-release
-    state: present
+    name: subscription-manager
+    state: absent
   when: ansible_distribution=="Amazon" or ansible_distribution=="RedHat"
 
 - name: Install Flask (Ubuntu)
