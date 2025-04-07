@@ -18,6 +18,22 @@
   when: ansible_distribution == "Amazon" or ansible_distribution == "RedHat"
 
 
+- name: Check if postgresql is initialized
+  stat:
+    path: /var/lib/pgsql/data/pg_hba.conf
+  register: postgres_data
+
+- name: Initialize PostgresSQL
+  shell: "postgresql-setup initdb"
+  when: not postgres_data.stat.exists
+
+
+- name: "Start and enable postgresql"
+  service:
+    name: postgresql 
+    state: started 
+    enabled: true
+
 - name: "Create db user"
   community.postgresql.postgresql_user:
     state: present
