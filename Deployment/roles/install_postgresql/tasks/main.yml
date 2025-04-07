@@ -2,9 +2,12 @@
 - include_role:
     name: update_cache
   
-- name: Update release
-  yum:
-    name: epel-release
+- name: Install packages
+  ansible.builtin.yum:
+    name: 
+      - postgresql
+      - postgresql-server
+      - postgresql-contrib
 
 - name: Install dependencies
   yum: name={{ item }} state=present
