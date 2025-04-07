@@ -44,5 +44,5 @@
 
 - name: Create app database
   become_user: postgres
-  shell: psql -f /opt/node-app/node_app/db/init.sql  
+  shell: psql -f /opt/node-app/db/init.sql  
 ...
