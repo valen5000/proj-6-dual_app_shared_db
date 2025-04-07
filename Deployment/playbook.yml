@@ -1,6 +1,6 @@
 ---
 - name: Application Deployment
-  hosts: ubuntu, redhat, centos
+  hosts: ubuntu, redhat, amazon
   become: true
   vars_files:
     - vars.yml
