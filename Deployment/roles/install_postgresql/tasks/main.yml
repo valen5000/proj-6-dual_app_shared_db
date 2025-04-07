@@ -1,6 +1,6 @@
 ---
 - include_role:
-  name: update_cache
+    name: update_cache
 
 - name: Install PostgreSQL on Ubuntu
   apt:
@@ -26,6 +26,7 @@
   postgresql_db:
     name: "{{ db_name }}"
     state: present
+  become: true
   become_user: postgres
   environment:
     ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
@@ -35,6 +36,7 @@
     name: "{{ db_user }}"
     password: "{{ db_password }}"
     state: present
+  become: true
   become_user: postgres
   environment:
     ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
@@ -46,6 +48,7 @@
     type: database
     privs: ALL
     grant_option: no
+  become: true
   become_user: postgres
   environment:
     ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
@@ -58,12 +61,13 @@
     databases: all
     method: md5
     address: 0.0.0.0/0
+  become: true
   become_user: postgres
   notify: Restart PostgreSQL
 
-  handlers:
-- name: Restart PostgreSQL
-  service:
-    name: postgresql
-    state: restarted
+- handlers:
+  - name: Restart PostgreSQL
+    service:
+      name: postgresql
+      state: restarted
 ...
