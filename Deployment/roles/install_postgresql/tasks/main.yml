@@ -8,10 +8,11 @@
 #     state: present
 #   when: ansible_distribution == "Ubuntu"
 
-- name: Install postgresql (Amazon|CentOs)
-  yum:
-    name: postgresql
-    state: present
+- name: Install postgresql
+  import_role:
+    name: linux-system-roles.postgresql
+  become: yes
+  become_user: root
 
 - name: Initialize PostgreSQL
   shell: "postgresql-setup initdb"
