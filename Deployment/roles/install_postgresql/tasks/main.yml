@@ -17,8 +17,8 @@
     path: "/var/lib/pgsql/data/pg_hba.conf"
   register: postgres_data
 
-- name: Initialize postgressql
-  ansible.builtins.shell: "postgresql-setup initdb"
+- name: Check if installed
+  ansible.builtin.shell: "postgresql-setup initdb"
   when: not postgres_data.stat.exists
 
 # - name: Install postgresql
