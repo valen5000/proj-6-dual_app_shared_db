@@ -10,7 +10,7 @@
 
 - name: Install postgresql (Amazon|CentOs)
   yum:
-    name: postgresql
+    name: postgresql,python3-psycopg2
     state: present
   when: ansible_distribution == "Amazon" or ansible_distribution == "CentOs"
 
