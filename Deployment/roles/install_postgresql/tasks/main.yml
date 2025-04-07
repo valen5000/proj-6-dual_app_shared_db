@@ -16,8 +16,8 @@
 
 
 - name: Create app database
-  become: true
-  become_user: postgres
+  # become: true
+  # become_user: postgres
   shell: psql -f /opt/node_app/db/init.sql
 
 - name: "Create db user"
