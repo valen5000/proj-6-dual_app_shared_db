@@ -2,8 +2,6 @@
 - name: Application Deployment
   hosts: ubuntu, redhat, amazon
   become: true
-  vars:
-    allow_world_readable_tmpfiles: true
   vars_files:
     - vars.yml
   roles:
