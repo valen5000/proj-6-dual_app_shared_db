@@ -22,20 +22,21 @@
     group: postgres
     mode: '0700'
 
-- name: "Create app database"
-  postgresql_db:
-    state: present
-    name: "{{ db_name }}"
-  become: true
-  become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
 - name: "Create db user"
   postgresql_user:
     state: present
     name: "{{ db_user }}"
     password: "{{ db_password }}"
+  become: true
+  become_user: postgres
+  environment:
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
+
+- name: "Create app database"
+  postgresql_db:
+    state: present
+    name: "{{ db_name }}"
   become: true
   become_user: postgres
   environment:
