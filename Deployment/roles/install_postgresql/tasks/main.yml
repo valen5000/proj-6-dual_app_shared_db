@@ -21,6 +21,12 @@
   ansible.builtin.shell: "postgresql-setup initdb"
   when: not postgres_data.stat.exists
 
+- name: Start and enable service
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+
 # - name: Install postgresql
 #   import_role:
 #     name: linux-system-roles.postgresql
