@@ -1,82 +1,69 @@
 ---
-- name: Install and configure PostgreSQL
-  hosts: app_server
-  become: true
-  vars_files:
-    - ../vars/vars.yml
+- include_role:
+  name: update_cache
 
-  tasks:
-    - name: Include update cache role
-      include_role:
-        name: update_cache
+- name: Install PostgreSQL on Ubuntu
+  apt:
+    name: postgresql
+    state: present
+  when: ansible_distribution == "Ubuntu"
 
-    - name: Ensure APT cache is updated (Debian/Ubuntu)
-      apt:
-        update_cache: yes
-      when: ansible_os_family == "Debian"
+- name: Install PostgreSQL on Amazon/CentOS
+  yum:
+    name: postgresql-server
+    state: present
+  when: ansible_distribution in ["Amazon", "CentOS"]
 
-    - name: Install PostgreSQL on Ubuntu
-      apt:
-        name: postgresql
-        state: present
-      when: ansible_distribution == "Ubuntu"
+- name: Ensure Ansible PostgreSQL temp directory exists
+  file:
+    path: /var/tmp/ansible-postgres
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0700'
 
-    - name: Install PostgreSQL on Amazon/CentOS
-      yum:
-        name: postgresql-server
-        state: present
-      when: ansible_distribution in ["Amazon", "CentOS"]
+- name: Create application database
+  postgresql_db:
+    name: "{{ db_name }}"
+    state: present
+  become_user: postgres
+  environment:
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
-    - name: Ensure Ansible PostgreSQL temp directory exists
-      file:
-        path: /var/tmp/ansible-postgres
-        state: directory
-        owner: postgres
-        group: postgres
-        mode: '0700'
+- name: Create DB user
+  postgresql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    state: present
+  become_user: postgres
+  environment:
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
-    - name: Create application database
-      postgresql_db:
-        name: "{{ db_name }}"
-        state: present
-      become_user: postgres
-      environment:
-        ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
+- name: Grant privileges to DB user
+  postgresql_privs:
+    database: "{{ db_name }}"
+    roles: "{{ db_user }}"
+    type: database
+    privs: ALL
+    grant_option: no
+  become_user: postgres
+  environment:
+    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
 
-    - name: Create DB user
-      postgresql_user:
-        name: "{{ db_user }}"
-        password: "{{ db_password }}"
-        state: present
-      become_user: postgres
-      environment:
-        ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
-
-    - name: Grant privileges to DB user
-      postgresql_privs:
-        database: "{{ db_name }}"
-        roles: "{{ db_user }}"
-        type: database
-        privs: ALL
-        grant_option: no
-      become_user: postgres
-      environment:
-        ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
-
-    - name: Allow MD5 connection for db user
-      postgresql_pg_hba:
-        dest: "/var/lib/pgsql/data/pg_hba.conf"
-        contype: host
-        users: "{{ db_user }}"
-        databases: all
-        method: md5
-        address: 0.0.0.0/0
-      become_user: postgres
-      notify: Restart PostgreSQL
+- name: Allow MD5 connection for db user
+  postgresql_pg_hba:
+    dest: "/var/lib/pgsql/data/pg_hba.conf"
+    contype: host
+    users: "{{ db_user }}"
+    databases: all
+    method: md5
+    address: 0.0.0.0/0
+  become_user: postgres
+  notify: Restart PostgreSQL
 
   handlers:
-    - name: Restart PostgreSQL
-      service:
-        name: postgresql
-        state: restarted
+- name: Restart PostgreSQL
+  service:
+    name: postgresql
+    state: restarted
 ...
