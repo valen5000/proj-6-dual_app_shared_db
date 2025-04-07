@@ -1,30 +1,52 @@
----
-- include_role:
-    name: update_cache
+- name: Create Node Service
+  copy:
+    dest: /etc/systemd/system/node-app.service
+    content: |
+      [Unit]
+      Description = Node App
+      After = network.target
 
-- name: Install postgresql (Ubuntu)
-  apt:
-    name: postgresql
-    state: present
-  when: ansible_distribution == "Ubuntu"
+      [Service]
+      WorkingDirectory = /opt/node-app
+      ExecStart = node /opt/node-app/node_app/index.js
+      Restart = always
 
-- name: Install postgresql (Amazon|RedHat)
-  yum:
-    name: postgresql
-    state: present
-  when: ansible_distribution == "Amazon" or ansible_distribution == "RedHat"
+      StandardOutput = append:/var/log/node-app.log
+      StandardError = append:/var/log/node-error.log
 
+      [Install]
+      WantedBy = multi_user.target
 
-- name: Create app database
-  become: true
-  become_user: postgres
-  shell: psql -f /opt/node_app/db/init.sql
+- name: Create Flask Service
+  copy:
+    dest: /etc/systemd/system/flask-app.service
+    content: |
+      [Unit]
+      Description = Flask App
+      After = network.target
 
-- name: "Create db user"
-  community.postgresql.postgresql_user:
-    state: present
-    name: "{{ db_user }}"
-    password: "{{ db_password }}"
-  become: true
-  become_user: postgres
+      [Service]
+      WorkingDirectory = /opt/flask-app
+      ExecStart = python3 /opt/flask-app/flask_app/app.py
+      Restart = always
+
+      StandardOutput = append:/var/log/flask-app.log
+      StandardError = append:/var/log/flask-error.log
+
+      [Install]
+      WantedBy = multi_user.target
+
+- name: Reload Systemd and Start Node App
+  systemd:
+    daemon_reload: yes
+    name: node-app
+    state: restarted
+    enabled: yes
+
+- name: Reload Systemd and Start Flask App
+  systemd:
+    daemon_reload: yes
+    name: flask-app
+    state: restarted
+    enabled: yes
 ...
