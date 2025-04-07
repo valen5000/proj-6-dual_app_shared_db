@@ -12,8 +12,8 @@
       - python3-psycopg2
     state: present
 
-- name: Check is psql is installed and running
-  ansible.builtins.stat:
+- name: Check if installed
+  ansible.builtin.stat:
     path: "/var/lib/pgsql/data/pg_hba.conf"
   register: postgres_data
 
