@@ -1,10 +1,10 @@
 ---
 - include_role:
     name: update_cache
-
+  
 - name: Update release
-  yum: epel-release
-  become: true
+  yum:
+    name: epel-release
 
 - name: Install dependencies
   yum: name={{ item }} state=present
