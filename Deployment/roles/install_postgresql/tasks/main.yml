@@ -2,17 +2,16 @@
 - include_role:
     name: update_cache
 
-- name: Install postgresql (Ubuntu)
-  apt:
-    name: postgresql
-    state: present
-  when: ansible_distribution == "Ubuntu"
+# - name: Install postgresql (Ubuntu)
+#   apt:
+#     name: postgresql
+#     state: present
+#   when: ansible_distribution == "Ubuntu"
 
 - name: Install postgresql (Amazon|CentOs)
   yum:
     name: postgresql
     state: present
-  when: ansible_distribution == "Amazon" or ansible_distribution == "Redhat"
 
 - name: Initialize PostgreSQL
   shell: "postgresql-setup initdb"
