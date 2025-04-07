@@ -9,5 +9,5 @@ hostnames:
 groups:
   ubuntu: "'ubuntu' in tags.OS"
   amazon: "'amazon' in tags.OS"
-  centos: "'centos' in tags.OS"
+  redhat: "'centos' in tags.OS"
 ...
