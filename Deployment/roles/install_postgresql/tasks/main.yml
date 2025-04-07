@@ -14,55 +14,16 @@
     state: present
   when: ansible_distribution == "Amazon" or ansible_distribution == "CentOs"
 
-- name: Ensure Ansible temp directory exists
-  file:
-    path: /var/tmp/ansible-postgres
-    state: directory
-    owner: postgres
-    group: postgres
-    mode: '0700'
 
+- name: Create app database
+  become_user: postgres
+  shell: psql -f /opt/node_app/db/init.sql
 
 - name: "Create db user"
-  postgresql_user:
+  community.postgresql.postgresql_user:
     state: present
     name: "{{ db_user }}"
     password: "{{ db_password }}"
   become: true
   become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
-
-- name: "Create app database"
-  postgresql_db:
-    state: present
-    name: "{{ db_name }}"
-  become: true
-  become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
-
-- name: "Grant db user access to app db"
-  postgresql_privs:
-    type: database
-    database: "{{ db_name }}"
-    roles: "{{ db_user }}"
-    grant_option: no
-    privs: all
-  become: true
-  become_user: postgres
-  environment:
-    ANSIBLE_REMOTE_TMP: /var/tmp/ansible-postgres
-
-- name: "Allow md5 connection for the db user"
-  postgresql_pg_hba:
-    dest: "~/data/pg_hba.conf"
-    contype: host
-    databases: all
-    method: md5
-    users: "{{ db_user }}"
-    create: true
-  become: true
-  become_user: postgres
-  notify: restart postgres  
 ...
