@@ -56,4 +56,9 @@
     create: true
   become: true
   become_user: postgres  
+
+- name: "Restart postgres"
+  service:
+    name: postgresql
+    state: restarted  
 ...
