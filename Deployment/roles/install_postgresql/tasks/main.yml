@@ -10,14 +10,21 @@
 
 - name: Install postgresql (Amazon|CentOs)
   yum:
-    name: postgresql,python3-psycopg2
+    name: postgresql
     state: present
   when: ansible_distribution == "Amazon" or ansible_distribution == "CentOs"
 
+- name: Initialize PostgreSQL
+  shell: "postgresql-setup initdb"
+
+- name: Start and enable the service
+  service: "name={{item}} state=started enabled=yes"
+  with_items:
+    - postgresql
 
 # - name: Create app database
-#   # become: true
-#   # become_user: postgres
+#   become: true
+#   become_user: postgres
 #   shell: psql -f /opt/node_app/db/init.sql
 
 - name: "Create db user"
@@ -25,6 +32,6 @@
     state: present
     name: "{{ db_user }}"
     password: "{{ db_password }}"
-  # become: true
-  # become_user: postgres
+  become: true
+  become_user: postgres
 ...
