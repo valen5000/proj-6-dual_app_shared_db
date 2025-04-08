@@ -8,3 +8,26 @@ pipeline {
         }
     }
 }
+      }
+        }
+        stage('Deploy') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo 'Deploying application...'
+            }
+        }
+    }
+    post {
+        always {
+            echo 'Pipeline completed!'
+        }
+        success {
+            echo 'Pipeline finished successfully!'
+        }
+        failure {
+            echo 'Pipeline failed!'
+        }
+    }
+}
